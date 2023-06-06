@@ -1,23 +1,105 @@
 <template>
-    <input v-on="listeners" class="custom-input">
+  <div class="wrapper-input">
+    <input 
+    v-on="listeners"
+    v-bind="$attrs"
+    @blur="blurHandler"
+    :value="value"
+    class="custom-input"
+    :class="!isValid && 'custom-input--error'" 
+    />
+    <span v-if="!isValid" class="custom-input__error">{{ error }}</span>
+  </div>
 </template>
 
 <script>
     export default {
         name: 'CustomInput',
+        data() {
+          return {
+            isValid: true,
+            error: '',
+            isFirstInput: true
+          }
+        },
+        inject: {
+          form: {
+            default: null
+          }
+        },
+        inheritAttrs: false,
+        props: {
+          value: {
+            type: String,
+            default: '',
+          },
+          errorMessage: {
+            type: String,
+            default: '',
+          },
+          rules: {
+            type: Array,
+            default: () => [],
+          }
+        },
         computed: {
-            listeners() {
-                return {
-                    ...this.$listeners,
-                    input: event => this.$emit('input', event.target.value)
-                }
+          listeners() {
+            return {
+              ...this.$attrs,
+              // ...this.$listeners,
+              input: event => this.$emit('input', event.target.value)
             }
+          }
+        },
+        watch: {
+          value() {
+            if (this.isFirstInput) return; 
+            this.validate();
+          }
+        },
+        mounted() {
+          if (!this.form) return;
+
+          this.form.registerInput(this)
+        },
+        beforeUnmount() {
+          if (!this.form) return;
+
+          this.form.unRegisterInput(this)
+        },
+        methods: {
+          validate(value) {
+            this.isValid = this.rules.every((rule) => {
+              const { hasPassed, message } = rule(value);
+              if (!hasPassed) {
+                this.error = message || this.errorMessage;
+              }
+              return hasPassed;
+            });
+            return this.isValid;
+          },
+          blurHandler() {
+            if (this.isFirstInput) {
+              this.validate();
+            }
+            this.isFirstInput = false;
+          },
+          reset() {
+            this.isFirstInput = true;
+            this.isValid = true;
+            this.$emit('input', '');
+          },
         }
     }
 </script>
 
 <style lang="scss" scoped>
 @import '../../assets/scss/variables.scss';
+
+.wrapper-input {
+  position: relative;
+  display: flex;
+}
 .custom-input {
   height: 40px;
   width: 100%;
@@ -26,7 +108,7 @@
   outline: none;
   line-height: inherit;
   padding: 8px 15px;
-
+  margin-bottom: 20px;
   &::placeholder {
     color: inherit;
   }
@@ -45,4 +127,5 @@
     line-height: 1.3;
   }
 }
+
 </style>

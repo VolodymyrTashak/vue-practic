@@ -1,7 +1,9 @@
 <template>
     <header class="header">
         <Container>
-            <Logo />
+            <router-link to="/">
+                <Logo />
+            </router-link>
         </Container>
     </header>
   </template>
@@ -29,5 +31,6 @@ import Logo from './Logo.vue';
   width: 100%;
   background: $secondary-color;
   padding: 16px 0;
+  z-index: 100;
 }
 </style>

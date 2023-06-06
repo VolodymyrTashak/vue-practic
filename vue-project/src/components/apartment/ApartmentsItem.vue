@@ -7,7 +7,8 @@
        <div class="apartments-item__rating">
         <StarRating :rating="rating" />
        </div>
-       <div class="apartments-item__price">UAH {{ price }} </div>
+       <div class="apartments-item__price">UAH {{ price }}</div>
+       <router-link :to="{ name: 'apartment', params: { id }, query: { name: 'John' } }" class="apartments-item__link"></router-link>
       </div>
      </div>
     </div>
@@ -22,6 +23,10 @@ import StarRating from '../StarRating.vue'
          StarRating
          },
         props: {
+          id: {
+            type: String,
+            required: true,
+          },
          descr: {
            type: String,
            default: ''
